@@ -1,13 +1,71 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@import '~antd/dist/antd.css';
+@font-face {
+  font-family: 'Inter';
+  src: url('./fonts/Inter-Regular.woff2') format('woff2'),
+       url('./fonts/Inter-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+html,
+body {
+  margin: 0;
+  padding: 0;
+};
+
+body { 
+  font-family: 'Inter', Arial, sans-serif;
+  font-size: 12px;
+  line-height: 22px;
 }
+
+.films {
+  width: 1200px;
+  margin: 0 auto;
+  font-family: 'Inter', Arial, sans-serif;
+  font-size: 12px;
+  line-height: 22px;
+  color: #000000;
+}
+
+.film-list {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.film-list__item {
+  margin-bottom: 35px;
+}
+
+.film-card {
+  width: 500px;
+  height: 280px;
+  display: flex;
+  box-sizing: border-box;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.film-card__poster {
+  width: 200px;
+}
+
+.film-card__info-container {
+  padding: 10px 30px 0;
+}
+
+.film-card__title {
+  font-size: 20px;
+  line-height: 28px;
+}
+
+.film-card__release {
+  color: #827E7E;
+}
+
+
+
+
