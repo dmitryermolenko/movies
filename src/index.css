@@ -21,7 +21,10 @@ body {
 
 .films {
   width: 1200px;
+  display: flex;
+  justify-content: center;
   margin: 0 auto;
+  padding-top: 50px;
   font-family: 'Inter', Arial, sans-serif;
   font-size: 12px;
   line-height: 22px;
@@ -64,6 +67,29 @@ body {
 
 .film-card__release {
   color: #827E7E;
+}
+
+
+.ant-alert-info {
+  width: 500px;
+  text-align: center;
+}
+
+.ant-alert-message {
+  font-size: 30px;
+  font-style: italic;
+}
+
+.ant-spin {
+  font-size: 40px;
+}
+
+.ant-spin-lg .ant-spin-dot {
+  font-size: 100px;
+}
+
+.ant-spin-text {
+  margin-top: 20px;
 }
 
 

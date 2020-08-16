@@ -8,7 +8,11 @@ export default class MovieService extends Component {
 
   async getResource() {
     const response = await fetch(this.apiBase);
+    if (response.ok) {
+      const body = await response.json();
+      return body;
+    }
 
-    return response.json();
+    throw new Error();
   }
 }
