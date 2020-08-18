@@ -24,7 +24,8 @@ export default class Movie extends Component {
     } = this.props;
 
     overview = trimText(overview, TRIM_LIMIT);
-    release = format(new Date(release), 'PP');
+    release =
+      release === '' || release === undefined ? Movie.defaultProps.release_date : format(new Date(release), 'PP');
 
     return (
       <article className="film-card">
@@ -43,4 +44,12 @@ export default class Movie extends Component {
 Movie.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   movie: PropTypes.object.isRequired,
+};
+
+Movie.propTypes = {
+  release_date: PropTypes.string,
+};
+
+Movie.defaultProps = {
+  release_date: '',
 };

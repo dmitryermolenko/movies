@@ -19,12 +19,16 @@ body {
   line-height: 22px;
 }
 
-.films {
+.main {
   width: 1200px;
-  display: flex;
-  justify-content: center;
   margin: 0 auto;
-  padding-top: 50px;
+  padding-top: 85px;
+}
+
+.films {
+  display: flex;
+  margin-top: 35px;
+  justify-content: center;
   font-family: 'Inter', Arial, sans-serif;
   font-size: 12px;
   line-height: 22px;
@@ -90,6 +94,15 @@ body {
 
 .ant-spin-text {
   margin-top: 20px;
+}
+
+.ant-input {
+  font-size: 20px;
+}
+
+.ant-pagination {
+  display: flex;
+  justify-content: center;
 }
 
 
