@@ -19,6 +19,12 @@ body {
   line-height: 22px;
 }
 
+
+img {
+  max-width:100%;
+  max-height:100%;
+  }
+
 .main {
   width: 1200px;
   margin: 0 auto;
@@ -49,16 +55,20 @@ body {
 }
 
 .film-card {
-  width: 500px;
+  width: 550px;
   height: 280px;
   display: flex;
   box-sizing: border-box;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.film-card__poster {
+/*.film-card__poster {
   width: 200px;
-}
+}*/
+
+/*.film-card__poster-container {
+  width: 200px;
+}*/
 
 .film-card__info-container {
   padding: 10px 30px 0;
@@ -85,6 +95,10 @@ body {
 }
 
 .ant-spin {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   font-size: 40px;
 }
 

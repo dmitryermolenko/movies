@@ -3,7 +3,6 @@ import { Spin, Alert, Input, Pagination } from 'antd';
 import { debounce } from 'lodash';
 import MovieList from '../MovieList/MovieList';
 import MovieService from '../MovieService/MovieService';
-/* import './App.css'; */
 
 const DELAYED_TIME = 500;
 
@@ -11,13 +10,14 @@ export default class App extends Component {
   constructor() {
     super();
     this.state = {
-      data: [],
+      data: null,
       isLoading: false,
       hasError: false,
       searchText: '',
       totalItems: null,
       currentPage: null,
       isFirstLoading: true,
+      hasData: false,
     };
 
     this.movieService = new MovieService();
@@ -29,7 +29,14 @@ export default class App extends Component {
 
   onDataLoad = (receivedData) => {
     const { results, total_results: totalItems, page } = receivedData;
-    this.setState({ data: results, totalItems, currentPage: page, isLoading: false, hasError: false });
+    this.setState({
+      data: results,
+      totalItems,
+      currentPage: page,
+      isLoading: false,
+      hasError: false,
+      hasData: !!results.length,
+    });
   };
 
   onGetError = () => {
@@ -43,25 +50,29 @@ export default class App extends Component {
   };
 
   onPageChange = (current) => {
-    const { searchText } = this.state;
-    this.setState({ isLoading: true });
+    const activePage = document.querySelector('.ant-pagination-item-active');
+    activePage.classList.remove('ant-pagination-item-active');
 
+    const { searchText } = this.state;
     this.getMovies(searchText, current);
   };
 
   getMovies = debounce((value, queryPage) => {
-    this.setState({ isLoading: true });
+    this.setState({ isLoading: true, hasData: false, data: null, totalItems: null, currentPage: null });
     this.movieService.getResource(value, queryPage).then(this.onDataLoad).catch(this.onGetError);
   }, DELAYED_TIME);
 
   render() {
-    const { data, totalItems, currentPage, isLoading, hasError, searchText, isFirstLoading } = this.state;
-    const hasData = !(isLoading || hasError);
+    const { data, totalItems, currentPage, isLoading, hasError, searchText, isFirstLoading, hasData } = this.state;
     const spinner = isLoading ? <Spin className="spin" tip="Loading..." size="large" /> : null;
     const content = hasData ? <MovieList movieList={data} isLoaded={isLoading} hasError={hasError} /> : null;
-    const errorMessage = hasError ? (
-      <Alert className="error-message" message="Not found. Try again" type="info" />
+    const pagination = hasData ? (
+      <Pagination showSizeChanger current={currentPage} pageSize={20} total={totalItems} onChange={this.onPageChange} />
     ) : null;
+    const errorMessage =
+      !hasData && !isLoading && data ? (
+        <Alert className="error-message" message="Not found. Try again" type="info" />
+      ) : null;
 
     if (isFirstLoading) {
       return <Spin className="spin" tip="Loading..." size="large" />;
@@ -75,15 +86,7 @@ export default class App extends Component {
           {content}
           {errorMessage}
         </section>
-        {hasData ? (
-          <Pagination
-            showSizeChanger
-            current={currentPage}
-            pageSize={20}
-            total={totalItems}
-            onChange={this.onPageChange}
-          />
-        ) : null}
+        {pagination}
       </main>
     );
   }
