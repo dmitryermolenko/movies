@@ -1,29 +1,37 @@
 import React, { Component } from 'react';
-import { Spin, Alert, Input, Pagination } from 'antd';
+import { Spin, Alert, Input, Pagination, Tabs } from 'antd';
 import { debounce } from 'lodash';
 import MovieList from '../MovieList/MovieList';
 import MovieService from '../MovieService/MovieService';
 
 const DELAYED_TIME = 500;
+const { TabPane } = Tabs;
 
 export default class App extends Component {
   constructor() {
     super();
     this.state = {
+      guestSessionID: null,
       data: null,
       isLoading: false,
       hasError: false,
-      searchText: '',
+      searchText: null,
       totalItems: null,
       currentPage: null,
       isFirstLoading: true,
       hasData: false,
+      ratedData: null,
+      totalRatedItems: null,
+      isRatedMode: false,
     };
 
     this.movieService = new MovieService();
   }
 
   componentDidMount() {
+    this.movieService
+      .getGuestSessionID()
+      .then(({ guest_session_id: guestSessionID }) => this.setState({ guestSessionID }));
     setTimeout(() => this.setState({ isFirstLoading: false }), 1000);
   }
 
@@ -39,6 +47,16 @@ export default class App extends Component {
     });
   };
 
+  onRatedDataLoad = (receivedData) => {
+    const { results, total_results: totalRatedItems, page } = receivedData;
+    this.setState({
+      ratedData: results,
+      totalRatedItems,
+      currentPage: page,
+      isRatedMode: true,
+    });
+  };
+
   onGetError = () => {
     this.setState({ isLoading: false, hasError: true });
   };
@@ -50,24 +68,80 @@ export default class App extends Component {
   };
 
   onPageChange = (current) => {
+    const { isRatedMode } = this.state;
     const activePage = document.querySelector('.ant-pagination-item-active');
     activePage.classList.remove('ant-pagination-item-active');
 
-    const { searchText } = this.state;
-    this.getMovies(searchText, current);
+    if (isRatedMode) {
+      this.rateMovies(current);
+    } else {
+      const { searchText } = this.state;
+      this.getMovies(searchText, current);
+    }
   };
 
   getMovies = debounce((value, queryPage) => {
-    this.setState({ isLoading: true, hasData: false, data: null, totalItems: null, currentPage: null });
+    this.setState({
+      isLoading: true,
+      hasData: false,
+      data: null,
+      totalItems: null,
+      currentPage: null,
+      isRatedMode: false,
+    });
     this.movieService.getResource(value, queryPage).then(this.onDataLoad).catch(this.onGetError);
   }, DELAYED_TIME);
 
+  rateMovies = (current = 1) => {
+    const { guestSessionID } = this.state;
+    this.movieService.getRatedMovies(guestSessionID, current).then((body) => this.onRatedDataLoad(body));
+  };
+
+  toggleRatedMode = (activeKey) => {
+    if (activeKey === 'rated') {
+      this.rateMovies();
+    } else {
+      const { isRatedMode } = this.state;
+      this.setState(() => ({ isRatedMode: !isRatedMode }));
+    }
+  };
+
   render() {
-    const { data, totalItems, currentPage, isLoading, hasError, searchText, isFirstLoading, hasData } = this.state;
+    const {
+      guestSessionID,
+      data,
+      ratedData,
+      totalItems,
+      totalRatedItems,
+      currentPage,
+      isLoading,
+      hasError,
+      searchText,
+      isFirstLoading,
+      hasData,
+      isRatedMode,
+    } = this.state;
     const spinner = isLoading ? <Spin className="spin" tip="Loading..." size="large" /> : null;
-    const content = hasData ? <MovieList movieList={data} isLoaded={isLoading} hasError={hasError} /> : null;
+    const content = hasData ? (
+      <MovieList
+        movieList={isRatedMode ? ratedData : data}
+        guestSessionID={guestSessionID}
+        isLoaded={isLoading}
+        hasError={hasError}
+        onRate={this.rateMovies}
+      />
+    ) : null;
+    const searchInput = !isRatedMode ? (
+      <Input placeholder="Type to search..." style={{ height: 50 }} value={searchText} onChange={this.onChange} />
+    ) : null;
     const pagination = hasData ? (
-      <Pagination showSizeChanger current={currentPage} pageSize={20} total={totalItems} onChange={this.onPageChange} />
+      <Pagination
+        showSizeChanger
+        current={currentPage}
+        pageSize={20}
+        total={isRatedMode ? totalRatedItems : totalItems}
+        onChange={this.onPageChange}
+      />
     ) : null;
     const errorMessage =
       !hasData && !isLoading && data ? (
@@ -80,7 +154,16 @@ export default class App extends Component {
 
     return (
       <main className="main">
-        <Input placeholder="Type to search..." style={{ height: 50 }} value={searchText} onChange={this.onChange} />
+        <Tabs
+          defaultActiveKey="search"
+          activeKey={isRatedMode ? 'rated' : 'search'}
+          centered
+          onChange={this.toggleRatedMode}
+        >
+          <TabPane tab="Search" key="search" />
+          <TabPane tab="Rated" key="rated" />
+        </Tabs>
+        {searchInput}
         <section className="films">
           {spinner}
           {content}
