@@ -20,10 +20,12 @@ export default class App extends Component {
       currentPage: null,
       isFirstLoading: true,
       hasData: false,
-      ratedData: null,
       totalRatedItems: null,
+      ratedData: null,
       isRatedMode: false,
     };
+
+    this.cache = {};
 
     this.movieService = new MovieService();
   }
@@ -37,8 +39,10 @@ export default class App extends Component {
 
   onDataLoad = (receivedData) => {
     const { results, total_results: totalItems, page } = receivedData;
+    const updatedResults = this.updateData(results, this.cache);
+
     this.setState({
-      data: results,
+      data: updatedResults,
       totalItems,
       currentPage: page,
       isLoading: false,
@@ -106,6 +110,20 @@ export default class App extends Component {
     }
   };
 
+  updateRating = (movie, rating) => {
+    const { data } = this.state;
+    this.cache[movie.id] = { ...movie, rating };
+    const updatedData = this.updateData(data, this.cache);
+
+    this.setState(() => ({ data: updatedData }));
+  };
+
+  updateData = (data, cache) => {
+    if (!Object.keys(cache).length) return data;
+
+    return data.map((movie) => cache[movie.id] || movie);
+  };
+
   render() {
     const {
       guestSessionID,
@@ -129,6 +147,7 @@ export default class App extends Component {
         isLoaded={isLoading}
         hasError={hasError}
         onRate={this.rateMovies}
+        updateRating={this.updateRating}
       />
     ) : null;
     const searchInput = !isRatedMode ? (

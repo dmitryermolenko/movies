@@ -13,23 +13,22 @@ export default class Movie extends Component {
     super();
     this.baseUrl = 'https://image.tmdb.org/t/p/';
     this.fileSize = 'w500/';
-    this.state = {
-      ownRating: null,
-    };
     this.movieService = new MovieService();
   }
 
   rateMovies = (rating) => {
     const {
+      movie,
       movie: { id },
       guestSessionID,
+      updateRating,
     } = this.props;
-    this.movieService.postMovieRating(id, guestSessionID, rating).then(() => this.setState({ ownRating: rating }));
+    this.movieService.postMovieRating(id, guestSessionID, rating).then(() => updateRating(movie, rating));
   };
 
   render() {
     const {
-      movie: { poster_path: poster, vote_average: rating, title },
+      movie: { poster_path: poster, vote_average: averageRating, title, rating },
     } = this.props;
     let {
       movie: { release_date: release, overview },
@@ -40,7 +39,10 @@ export default class Movie extends Component {
       release === '' || release === undefined ? Movie.defaultProps.release_date : format(new Date(release), 'PP');
 
     const posterPath = poster ? `${this.baseUrl}${this.fileSize}${poster}` : noPoster;
-    const { ownRating } = this.state;
+
+    // eslint-disable-next-line no-nested-ternary
+    const ratingColor =
+      averageRating <= 3 ? 'law' : averageRating <= 5 ? 'middle' : averageRating <= 7 ? 'high' : 'top';
 
     return (
       <article className="film-card">
@@ -48,12 +50,12 @@ export default class Movie extends Component {
         <div className="film-card__info-container">
           <div className="film-card__info-container-top">
             <h2 className="film-card__title">{title}</h2>
-            <span className="film-card__rating">{rating}</span>
+            <span className={`film-card__rating film-card__rating--${ratingColor}`}>{averageRating}</span>
           </div>
           <span className="film-card__release">{release}</span>
           <span className="film-card__genre" />
           <p className="film-card__description">{overview}</p>
-          <Rate count={10} value={ownRating} allowHalf onChange={this.rateMovies} />
+          <Rate count={10} value={rating} allowHalf onChange={this.rateMovies} />
         </div>
       </article>
     );
@@ -65,6 +67,7 @@ Movie.propTypes = {
   movie: PropTypes.object.isRequired,
   release_date: PropTypes.string,
   guestSessionID: PropTypes.string.isRequired,
+  updateRating: PropTypes.func.isRequired,
 };
 
 Movie.defaultProps = {
