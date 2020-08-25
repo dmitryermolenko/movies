@@ -7,8 +7,8 @@ export default class MovieService extends Component {
     this.apiKey = 'api_key=aec96291b4add0d3139346ca39206d6f';
     this.searchEndPoint = '/search/movie?';
     this.guestSessionEndPoint = '/authentication/guest_session/new?';
-    this.rateMovieEndPoint = '/movie/';
-    this.getRatedMoviesEndPoint = '/guest_session/{guest_session_id}/rated/movies';
+    this.ratedMovieEndPoint = '/movie/';
+    this.genresEndPoint = '/genre/movie/list';
   }
 
   async getResource(keyWord, queryPage = 1) {
@@ -45,9 +45,20 @@ export default class MovieService extends Component {
     throw new Error();
   }
 
-  async postMovieRating(movieId, getGuestSessionID, rating) {
+  async getGenres() {
+    const response = await fetch(`${this.apiBase}${this.genresEndPoint}?${this.apiKey}`);
+
+    if (response.ok) {
+      const { genres } = await response.json();
+      return genres;
+    }
+
+    throw new Error();
+  }
+
+  async postMovieRating(movieId, guestSessionID, rating) {
     const response = await fetch(
-      `${this.apiBase}${this.rateMovieEndPoint}${movieId}/rating?${this.apiKey}&guest_session_id=${getGuestSessionID}`,
+      `${this.apiBase}${this.ratedMovieEndPoint}${movieId}/rating?${this.apiKey}&guest_session_id=${guestSessionID}`,
       {
         method: 'POST',
         headers: {

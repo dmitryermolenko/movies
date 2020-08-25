@@ -3,6 +3,7 @@ import { Spin, Alert, Input, Pagination, Tabs } from 'antd';
 import { debounce } from 'lodash';
 import MovieList from '../MovieList/MovieList';
 import MovieService from '../MovieService/MovieService';
+import { GenreProvider } from '../GenreContext/GenreContext';
 
 const DELAYED_TIME = 500;
 const { TabPane } = Tabs;
@@ -26,6 +27,7 @@ export default class App extends Component {
     };
 
     this.cache = {};
+    this.genres = null;
 
     this.movieService = new MovieService();
   }
@@ -35,6 +37,14 @@ export default class App extends Component {
       .getGuestSessionID()
       .then(({ guest_session_id: guestSessionID }) => this.setState({ guestSessionID }));
     setTimeout(() => this.setState({ isFirstLoading: false }), 1000);
+
+    // eslint-disable-next-line no-return-assign
+    this.movieService.getGenres().then((genres) => {
+      this.genres = genres.reduce((acc, cur) => {
+        acc[cur.id] = cur.name;
+        return acc;
+      }, {});
+    });
   }
 
   onDataLoad = (receivedData) => {
@@ -141,14 +151,16 @@ export default class App extends Component {
     } = this.state;
     const spinner = isLoading ? <Spin className="spin" tip="Loading..." size="large" /> : null;
     const content = hasData ? (
-      <MovieList
-        movieList={isRatedMode ? ratedData : data}
-        guestSessionID={guestSessionID}
-        isLoaded={isLoading}
-        hasError={hasError}
-        onRate={this.rateMovies}
-        updateRating={this.updateRating}
-      />
+      <GenreProvider value={this.genres}>
+        <MovieList
+          movieList={isRatedMode ? ratedData : data}
+          guestSessionID={guestSessionID}
+          isLoaded={isLoading}
+          hasError={hasError}
+          onRate={this.rateMovies}
+          updateRating={this.updateRating}
+        />
+      </GenreProvider>
     ) : null;
     const searchInput = !isRatedMode ? (
       <Input placeholder="Type to search..." style={{ height: 50 }} value={searchText} onChange={this.onChange} />

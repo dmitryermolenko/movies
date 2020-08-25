@@ -5,8 +5,9 @@ import { format } from 'date-fns';
 import trimText from '../../util/util';
 import noPoster from '../../images/no-image.jpg';
 import MovieService from '../MovieService/MovieService';
+import { GenreConsumer } from '../GenreContext/GenreContext';
 
-const TRIM_LIMIT = 250;
+const TRIM_LIMIT = 150;
 
 export default class Movie extends Component {
   constructor() {
@@ -26,6 +27,20 @@ export default class Movie extends Component {
     this.movieService.postMovieRating(id, guestSessionID, rating).then(() => updateRating(movie, rating));
   };
 
+  getGenres = (genresData) => {
+    const {
+      movie: { genre_ids: genresIDs },
+    } = this.props;
+
+    return genresIDs.map((id) => {
+      return (
+        <li key={id} className="film-card__genre-item">
+          {genresData[id]}
+        </li>
+      );
+    });
+  };
+
   render() {
     const {
       movie: { poster_path: poster, vote_average: averageRating, title, rating },
@@ -42,22 +57,33 @@ export default class Movie extends Component {
 
     // eslint-disable-next-line no-nested-ternary
     const ratingColor =
+      // eslint-disable-next-line no-nested-ternary
       averageRating <= 3 ? 'law' : averageRating <= 5 ? 'middle' : averageRating <= 7 ? 'high' : 'top';
 
     return (
-      <article className="film-card">
-        <img src={posterPath} alt="" className="film-card__poster" />
-        <div className="film-card__info-container">
-          <div className="film-card__info-container-top">
-            <h2 className="film-card__title">{title}</h2>
-            <span className={`film-card__rating film-card__rating--${ratingColor}`}>{averageRating}</span>
-          </div>
-          <span className="film-card__release">{release}</span>
-          <span className="film-card__genre" />
-          <p className="film-card__description">{overview}</p>
-          <Rate count={10} value={rating} allowHalf onChange={this.rateMovies} />
-        </div>
-      </article>
+      <GenreConsumer>
+        {(genresData) => {
+          const genreNames = this.getGenres(genresData);
+          return (
+            <article className="film-card">
+              <div className="film-card__poster-container">
+                <img src={posterPath} alt="" className="film-card__poster" />
+              </div>
+
+              <div className="film-card__info-container">
+                <div className="film-card__info-container-top">
+                  <h2 className="film-card__title">{title}</h2>
+                  <span className={`film-card__rating film-card__rating--${ratingColor}`}>{averageRating}</span>
+                </div>
+                <span className="film-card__release">{release}</span>
+                <ul className="film-card__genre-list">{genreNames}</ul>
+              </div>
+              <p className="film-card__description">{overview}</p>
+              <Rate className="film-card__stars" count={10} value={rating} allowHalf onChange={this.rateMovies} />
+            </article>
+          );
+        }}
+      </GenreConsumer>
     );
   }
 }
