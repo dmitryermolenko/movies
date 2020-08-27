@@ -41,6 +41,21 @@ export default class Movie extends Component {
     });
   };
 
+  changeRatingModificator = (averageRating) => {
+    let rating;
+    if (averageRating <= 3) {
+      rating = 'law';
+    } else if (averageRating <= 5) {
+      rating = 'middle';
+    } else if (averageRating <= 7) {
+      rating = 'high';
+    } else {
+      rating = 'top';
+    }
+
+    return rating;
+  };
+
   render() {
     const {
       movie: { poster_path: poster, vote_average: averageRating, title, rating },
@@ -55,10 +70,7 @@ export default class Movie extends Component {
 
     const posterPath = poster ? `${this.baseUrl}${this.fileSize}${poster}` : noPoster;
 
-    // eslint-disable-next-line no-nested-ternary
-    const ratingColor =
-      // eslint-disable-next-line no-nested-ternary
-      averageRating <= 3 ? 'law' : averageRating <= 5 ? 'middle' : averageRating <= 7 ? 'high' : 'top';
+    const ratingModificator = this.changeRatingModificator(averageRating);
 
     return (
       <GenreConsumer>
@@ -73,7 +85,7 @@ export default class Movie extends Component {
               <div className="film-card__info-container">
                 <div className="film-card__info-container-top">
                   <h2 className="film-card__title">{title}</h2>
-                  <span className={`film-card__rating film-card__rating--${ratingColor}`}>{averageRating}</span>
+                  <span className={`film-card__rating film-card__rating--${ratingModificator}`}>{averageRating}</span>
                 </div>
                 <span className="film-card__release">{release}</span>
                 <ul className="film-card__genre-list">{genreNames}</ul>
