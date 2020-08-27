@@ -167,7 +167,7 @@ export default class App extends Component {
     ) : null;
     const pagination = hasData ? (
       <Pagination
-        showSizeChanger
+        showSizeChanger={false}
         current={currentPage}
         pageSize={20}
         total={isRatedMode ? totalRatedItems : totalItems}
