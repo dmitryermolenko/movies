@@ -136,7 +136,11 @@ export default class App extends Component {
   };
 
   updateData = (data, cache) => {
-    if (!Object.keys(cache).length) return data;
+    for (const key in cache) {
+      if (!Object.prototype.hasOwnProperty.call(cache, key)) {
+        return data;
+      }
+    }
 
     return data.map((movie) => cache[movie.id] || movie);
   };
