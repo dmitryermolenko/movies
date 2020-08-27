@@ -83,8 +83,7 @@ export default class App extends Component {
 
   onPageChange = (current) => {
     const { isRatedMode } = this.state;
-    const activePage = document.querySelector('.ant-pagination-item-active');
-    activePage.classList.remove('ant-pagination-item-active');
+    this.setState(() => ({ currentPage: current }));
 
     if (isRatedMode) {
       this.rateMovies(current);
