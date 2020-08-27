@@ -160,35 +160,6 @@ export default class App extends Component {
       hasData,
       isRatedMode,
     } = this.state;
-    const spinner = isLoading ? <Spin className="spin" tip="Loading..." size="large" /> : null;
-    const content = hasData ? (
-      <GenreProvider value={this.genres}>
-        <MovieList
-          movieList={isRatedMode ? ratedData : data}
-          guestSessionID={guestSessionID}
-          isLoaded={isLoading}
-          hasError={hasError}
-          onRate={this.rateMovies}
-          updateRating={this.updateRating}
-        />
-      </GenreProvider>
-    ) : null;
-    const searchInput = !isRatedMode ? (
-      <Input placeholder="Type to search..." style={{ height: 50 }} value={searchText} onChange={this.onChange} />
-    ) : null;
-    const pagination = hasData ? (
-      <Pagination
-        showSizeChanger={false}
-        current={currentPage}
-        pageSize={20}
-        total={isRatedMode ? totalRatedItems : totalItems}
-        onChange={this.onPageChange}
-      />
-    ) : null;
-    const errorMessage =
-      !hasData && !isLoading && data ? (
-        <Alert className="error-message" message="Not found. Try again" type="info" />
-      ) : null;
 
     if (isFirstLoading) {
       return <Spin className="spin" tip="Loading..." size="large" />;
@@ -205,13 +176,36 @@ export default class App extends Component {
           <TabPane tab="Search" key="search" />
           <TabPane tab="Rated" key="rated" />
         </Tabs>
-        {searchInput}
+        {!isRatedMode && (
+          <Input placeholder="Type to search..." style={{ height: 50 }} value={searchText} onChange={this.onChange} />
+        )}
         <section className="films">
-          {spinner}
-          {content}
-          {errorMessage}
+          {isLoading && <Spin className="spin" tip="Loading..." size="large" />}
+          {hasData && (
+            <GenreProvider value={this.genres}>
+              <MovieList
+                movieList={isRatedMode ? ratedData : data}
+                guestSessionID={guestSessionID}
+                isLoaded={isLoading}
+                hasError={hasError}
+                onRate={this.rateMovies}
+                updateRating={this.updateRating}
+              />
+            </GenreProvider>
+          )}
+          {!hasData && !isLoading && data && (
+            <Alert className="error-message" message="Not found. Try again" type="info" />
+          )}
         </section>
-        {pagination}
+        {hasData && (
+          <Pagination
+            showSizeChanger={false}
+            current={currentPage}
+            pageSize={20}
+            total={isRatedMode ? totalRatedItems : totalItems}
+            onChange={this.onPageChange}
+          />
+        )}
       </main>
     );
   }
