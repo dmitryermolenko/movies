@@ -121,9 +121,16 @@ export default class App extends Component {
   };
 
   updateRating = (movie, rating) => {
-    const { data } = this.state;
+    const { data, ratedData, isRatedMode } = this.state;
     this.cache[movie.id] = { ...movie, rating };
+
     const updatedData = this.updateData(data, this.cache);
+
+    if (isRatedMode) {
+      const updatedRatedData = this.updateData(ratedData, this.cache);
+      this.setState(() => ({ data: updatedData, ratedData: updatedRatedData }));
+      return;
+    }
 
     this.setState(() => ({ data: updatedData }));
   };
