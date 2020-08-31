@@ -24,9 +24,9 @@ export default class App extends Component {
       totalRatedItems: null,
       ratedData: null,
       isRatedMode: false,
+      cache: {},
     };
 
-    this.cache = {};
     this.genres = null;
 
     this.movieService = new MovieService();
@@ -47,9 +47,11 @@ export default class App extends Component {
     });
   }
 
+  /* обновить стейт с учетом полученныч данных с сервера */
   onDataLoad = (receivedData) => {
     const { results, total_results: totalItems, page } = receivedData;
-    const updatedResults = this.updateData(results, this.cache);
+    const { cache } = this.state;
+    const updatedResults = this.updateData(results, cache);
 
     this.setState({
       data: updatedResults,
@@ -61,6 +63,7 @@ export default class App extends Component {
     });
   };
 
+  /* обновить стейт с учетом полученныч данных с рейтингом с сервера */
   onRatedDataLoad = (receivedData) => {
     const { results, total_results: totalRatedItems, page } = receivedData;
     this.setState({
@@ -93,6 +96,7 @@ export default class App extends Component {
     }
   };
 
+  /* получить данные с сервера */
   getMovies = debounce((value, queryPage) => {
     this.setState({
       isLoading: true,
@@ -105,6 +109,7 @@ export default class App extends Component {
     this.movieService.getResource(value, queryPage).then(this.onDataLoad).catch(this.onGetError);
   }, DELAYED_TIME);
 
+  /* оценить фильм */
   rateMovies = (current = 1) => {
     const { guestSessionID } = this.state;
     this.movieService.getRatedMovies(guestSessionID, current).then((body) => this.onRatedDataLoad(body));
@@ -119,21 +124,24 @@ export default class App extends Component {
     }
   };
 
+  /* обновить рейтинг в полях для всех фильмов, оцененных фильмов и кэше */
   updateRating = (movie, rating) => {
-    const { data, ratedData, isRatedMode } = this.state;
-    this.cache[movie.id] = { ...movie, rating };
+    const { data, ratedData, isRatedMode, cache } = this.state;
+    const updatedCache = cache;
+    updatedCache[movie.id] = { ...movie, rating };
 
-    const updatedData = this.updateData(data, this.cache);
+    const updatedData = this.updateData(data, updatedCache);
 
     if (isRatedMode) {
-      const updatedRatedData = this.updateData(ratedData, this.cache);
-      this.setState(() => ({ data: updatedData, ratedData: updatedRatedData }));
+      const updatedRatedData = this.updateData(ratedData, updatedCache);
+      this.setState(() => ({ data: updatedData, ratedData: updatedRatedData, cache: updatedCache }));
       return;
     }
 
-    this.setState(() => ({ data: updatedData }));
+    this.setState(() => ({ data: updatedData, cache: updatedCache }));
   };
 
+  /* обновить данные новым рейтингом */
   updateData = (data, cache) => {
     for (const key in cache) {
       if (!Object.prototype.hasOwnProperty.call(cache, key)) {
