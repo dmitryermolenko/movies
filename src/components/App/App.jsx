@@ -127,7 +127,7 @@ export default class App extends Component {
   /* обновить рейтинг в полях для всех фильмов, оцененных фильмов и кэше */
   updateRating = (movie, rating) => {
     const { data, ratedData, isRatedMode, cache } = this.state;
-    const updatedCache = cache;
+    const updatedCache = { ...cache };
     updatedCache[movie.id] = { ...movie, rating };
 
     const updatedData = this.updateData(data, updatedCache);
